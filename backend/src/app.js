@@ -21,9 +21,10 @@ app.use(cookieParser());
 
 //Routes
 import userRoutes from "./routes/user.routes.js";
-
+import captainRoutes from "./routes/captain.routes.js";
 
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/captains", captainRoutes);
 
 export default app;
