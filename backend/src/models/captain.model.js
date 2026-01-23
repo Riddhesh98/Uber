@@ -3,13 +3,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const captainSchema = new mongoose.Schema({
-  firstname: {
+  firstName: {
     type: String,
     required: true,
     minlength: [3, "First name must be at least 3 characters long"],
   },
 
-  lastname: {
+  lastName: {
     type: String,
     minlength: [3, "Last name must be at least 3 characters long"],
   },

@@ -2,6 +2,7 @@ import { Captain } from "../models/captain.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
+console.log("🔥 captain.controller.js RUNNING 🔥");
 
 const generateAcessAndRefreshToken = async (captainId) => {
     try {
@@ -30,9 +31,9 @@ const generateAcessAndRefreshToken = async (captainId) => {
 
 const registerCaptain = asyncHandler(async (req, res) => {
     //logic for registering a captain
-    const { firstname, lastname, email, password, vehicle} = req.body;
+    const { firstName, lastName, email, password, vehicle} = req.body;
 
-    if([firstname, lastname, email, password].some((field) => field.trim() == "")) {
+    if([firstName, lastName, email, password].some((field) => field.trim() == "")) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -44,8 +45,8 @@ const registerCaptain = asyncHandler(async (req, res) => {
     }
 
     const captain = await Captain.create({
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         email,
         password,
         vehicle: {
@@ -79,8 +80,8 @@ const registerCaptain = asyncHandler(async (req, res) => {
             {
                 captain: {
                     _id: captain._id,
-                    firstname: captain.firstname,
-                    lastname: captain.lastname,
+                    firstName: captain.firstName,
+                    lastName: captain.lastName,
                     email: captain.email,
                     color: vehicle.color,
                     plate: vehicle.plate,
@@ -137,8 +138,8 @@ const loginCaptain = asyncHandler(async (req, res) => {
             {
                 captain: {
                     _id: captain._id,
-                    firstname: captain.firstname,
-                    lastname: captain.lastname,
+                    firstName: captain.firstName,
+                    lastName: captain.lastName,
                     email: captain.email,
                     phone: captain.phone,
                 },

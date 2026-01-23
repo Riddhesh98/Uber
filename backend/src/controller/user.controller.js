@@ -21,11 +21,17 @@ const generateAcessAndRefreshToken = async (userId) => {
 
 // ================= REGISTER =================
 const registerUser = asyncHandler(async (req, res) => {
+  
   // 🔥 FIX: schema uses firstName / lastName
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password , vehicle} = req.body;
 
+  
   if ([firstName, email, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "Firstname, email and password are required");
+  }
+
+  if(!vehicle || !vehicle.color || !vehicle.plate || !vehicle.capacity || !vehicle.vehicleType){
+    throw new ApiError(400, "All vehicle details are required");
   }
 
   const existingUser = await User.findOne({
@@ -41,6 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     lastName,
     email,
     password,
+    vehicle
   });
 
   const { accessToken, refreshToken } =
