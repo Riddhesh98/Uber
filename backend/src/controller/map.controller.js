@@ -3,7 +3,7 @@ import axios from "axios";
 const GEOAPIFY_KEY = process.env.GEOAPIFY_API_KEY;
 
 // Address → Lat/Lng
-const geocodeAddress = async (address) => {
+export const geocodeAddress = async (address) => {
   const url = "https://api.geoapify.com/v1/geocode/search";
 
   const response = await axios.get(url, {
@@ -24,7 +24,7 @@ const geocodeAddress = async (address) => {
 };
 
 // Distance + Time
-const getRouteInfo = async (start, end) => {
+export const getRouteInfo = async (start, end) => {
   const url = "https://api.geoapify.com/v1/routing";
 
   const response = await axios.get(url, {
@@ -75,6 +75,49 @@ export const calculateRoute = async (req, res) => {
     console.error(error.response?.data || error.message);
 
     res.status(500).json({
+      success: false,
+      message: error.response?.data?.message || error.message,
+    });
+  }
+};
+
+
+
+export const addressSuggestions = async (req, res) => {
+  try {
+    const { text } = req.query; // or req.body.text for POST
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Query parameter 'text' is required",
+      });
+    }
+
+    const url = "https://api.geoapify.com/v1/geocode/autocomplete";
+
+    const response = await axios.get(url, {
+      params: {
+        text,
+        limit: 5,
+        apiKey: GEOAPIFY_KEY,
+      },
+    });
+
+    const suggestions = response.data.features.map((feature) => ({
+      address: feature.properties.formatted,
+      lat: feature.geometry.coordinates[1],
+      lng: feature.geometry.coordinates[0],
+    }));
+
+    res.status(200).json({
+      success: true,
+      suggestions,
+    });
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+
+    res.status(error.response?.status || 500).json({
       success: false,
       message: error.response?.data?.message || error.message,
     });
