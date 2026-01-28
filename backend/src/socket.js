@@ -18,6 +18,7 @@ const initializeSocket = (server) => {
     // 🔗 Join socket
     socket.on("join", async ({ userId, userType }) => {
       try {
+        console.log(`user ${userId} of type ${userType} joined with socket ID ${socket.id}`);
         if (!userId || !userType) return;
 
         if (userType === "user") {
@@ -25,11 +26,12 @@ const initializeSocket = (server) => {
             socketId: socket.id,
           });
         }
-
+        
         if (userType === "captain") {
           await Captain.findByIdAndUpdate(userId, {
             socketId: socket.id,
           });
+          console.log(` from backedn Captain ${userId} socket ID updated to ${socket.id}`);
         }
       } catch (error) {
         console.error("Join socket error:", error.message);

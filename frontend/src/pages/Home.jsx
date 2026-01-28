@@ -1,4 +1,4 @@
-    import React, { useRef, useState } from 'react'
+    import React, { useEffect, useRef, useState } from 'react'
     import { useGSAP } from '@gsap/react';
     import gsap from 'gsap';
     import 'remixicon/fonts/remixicon.css'
@@ -8,6 +8,9 @@
     import LookingForDriver from '../components/LookingForDriver';
     import WaitingForDriver from '../components/WaitingForDriver';
     import axios from 'axios';
+    import { SocketContext } from '../context/SocketContext';
+    import {UserDataContext} from "../context/UserContext"
+
 
     const Home = () => {
         const [pickup, setPickup] = useState('')
@@ -32,6 +35,25 @@
             const [fareData, setFareData] = useState(null)
              const [ispickupActive, setIspickupActive] = useState(true)
             const [vehicleSelect, setvehicleSelect] = useState(null)
+
+            const {sendMessage , receiveMessage} = React.useContext(SocketContext);
+            const {user} = React.useContext(UserDataContext);
+
+            useEffect(() =>{
+                if(!user) return;
+
+                sendMessage("join" , {
+                    userType:"user",
+                    userId:user.user?._id   
+                })
+                console.log(user)
+                console.log("User joined socket with ID:", user.user?._id);
+
+              
+
+            },[user])
+
+
 
         const submitHandler = (e) => {
             e.preventDefault()

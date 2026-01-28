@@ -2,7 +2,7 @@ import { Captain } from "../models/captain.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
-console.log("🔥 captain.controller.js RUNNING 🔥");
+
 
 const generateAcessAndRefreshToken = async (captainId) => {
     try {
