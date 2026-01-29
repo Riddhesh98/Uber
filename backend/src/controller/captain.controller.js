@@ -1,4 +1,4 @@
-import { Captain } from "../models/captain.model.js";
+import { Captain } from "../models/Captain.model.js";
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"

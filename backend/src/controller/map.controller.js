@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { Captain } from "../models/Captain.model.js";
 const GEOAPIFY_KEY = process.env.GEOAPIFY_API_KEY;
 
 // Address → Lat/Lng
@@ -44,8 +44,7 @@ export const getRouteInfo = async (start, end) => {
 };
 
 export const calculateRoute = async (req, res) => {
-  console.log("🔥 calculateRoute HIT");
-  console.log("BODY:", req.body);
+
   try {
     const { pickup, destination } = req.body;
 
@@ -123,3 +122,41 @@ export const addressSuggestions = async (req, res) => {
     });
   }
 };
+export const getCaptainInTheRadius = async (ltd, lng, radius) => {
+  // get captains with valid location
+  const captains = await Captain.find({
+    "location.ltd": { $ne: null },
+    "location.lng": { $ne: null },
+   
+  });
+
+  const R = 6371; // Earth radius in KM
+
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const nearbyCaptains = captains.filter(captain => {
+    const distance = getDistance(
+      ltd,
+      lng,
+      captain.location.ltd,
+      captain.location.lng
+    );
+
+    return distance <= radius;
+  });
+
+  console.log(nearbyCaptains);
+  return nearbyCaptains;
+};
+

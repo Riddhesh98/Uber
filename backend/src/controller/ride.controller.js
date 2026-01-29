@@ -1,6 +1,8 @@
-import {calculateRoute, getRouteInfo , geocodeAddress} from "../controller/map.controller.js"
+import {calculateRoute, getRouteInfo , geocodeAddress, getCaptainInTheRadius} from "../controller/map.controller.js"
 import {Ride} from "../models/ride.model.js"
 import crypto from "crypto"
+import {sendMessageToSocketId} from "../socket.js"
+
 
 export const otpGenerator = (digit)=>{
     //through crpto generate digit otp
@@ -87,7 +89,12 @@ export const createRide= async (req,res)=>{
       motorcycle: Math.round(baseFare + costPerKmMoto * distance),
     };
 
+    console.log(pickupCoords)
+  
 
+    const getCaptainInRadius = await getCaptainInTheRadius(pickupCoords.lat, pickupCoords.lng, 10);
+
+    console.log(getCaptainInRadius)
  //save ride to db
 
     
@@ -105,7 +112,7 @@ const ride = new Ride({
     status: 'pending',
     otp: otpGenerator(6),
 });
-    const rideCreateSave =await ride.save();
+    const rideCreateSave =await ride.save("-otp");
     
     if(!rideCreateSave){
         throw new ApiError(500, "Could not create ride request, try again later");

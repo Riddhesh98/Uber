@@ -115,6 +115,6 @@ captainSchema.methods.generateRefreshToken = function () {
   );
 };
 
-const Captain = mongoose.model("Captain", captainSchema);
+const Captain = mongoose.models.Captain  || mongoose.model("Captain", captainSchema);
 
 export { Captain };

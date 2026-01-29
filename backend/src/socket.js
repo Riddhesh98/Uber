@@ -18,7 +18,9 @@ const initializeSocket = (server) => {
     // 🔗 Join socket
     socket.on("join", async ({ userId, userType }) => {
       try {
-        console.log(`user ${userId} of type ${userType} joined with socket ID ${socket.id}`);
+        console.log(
+          `user ${userId} of type ${userType} joined with socket ID ${socket.id}`
+        );
         if (!userId || !userType) return;
 
         if (userType === "user") {
@@ -26,22 +28,26 @@ const initializeSocket = (server) => {
             socketId: socket.id,
           });
         }
-        
+
         if (userType === "captain") {
           await Captain.findByIdAndUpdate(userId, {
             socketId: socket.id,
           });
-          console.log(` from backedn Captain ${userId} socket ID updated to ${socket.id}`);
+          console.log(
+            `from backend Captain ${userId} socket ID updated to ${socket.id}`
+          );
         }
       } catch (error) {
         console.error("Join socket error:", error.message);
       }
     });
 
-    // 📍 Captain location update
     socket.on("update-location-captain", async ({ userId, location }) => {
       try {
-        if (!location?.ltd || !location?.lng) {
+        if (
+          location?.ltd === undefined ||
+          location?.lng === undefined
+        ) {
           return socket.emit("error", {
             message: "Invalid location data",
           });
@@ -53,16 +59,14 @@ const initializeSocket = (server) => {
             lng: location.lng,
           },
         });
+
+        console.log("📍 Location updated for:", userId);
       } catch (error) {
         console.error("Location update error:", error.message);
       }
     });
-
-    socket.on("disconnect", () => {
-      console.log("❌ Client disconnected:", socket.id);
-    });
-  });
-};
+  }); // ✅ closes io.on("connection")
+}; // ✅ closes initializeSocket
 
 // 📤 Send event to specific socket
 const sendMessageToSocketId = (socketId, messageObject) => {

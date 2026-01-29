@@ -17,22 +17,45 @@ const CaptainHome = () => {
     const ridePopupPanelRef = useRef(null)
     const confirmRidePopupPanelRef = useRef(null)
 
-    const {sendMessage , receiveMessage} = React.useContext(SocketContext);
+    const {sendMessage , receiveMessage ,socket} = React.useContext(SocketContext);
     const {captain} = React.useContext(CaptainDataContext);
 
-    useEffect(() =>{
-        if(!captain) return;
-
-        sendMessage("join" , {
-            userType:"captain",
-            userId:captain.captain?._id   
-        })
-        console.log(captain)
-        console.log("User joined socket with ID:", captain.captain?._id);
-
-      
-        
-    },[captain])
+    useEffect(() => {
+        if (!captain) return;
+    
+        sendMessage("join", {
+            userType: "captain",
+            userId: captain.captain?._id
+        });
+    
+        console.log("Captain joined socket room from frontend:", captain.captain?._id);
+    
+        const updateLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const locData = {
+                        userId: captain.captain?._id,
+                        location: {
+                            ltd: position.coords.latitude, // changed 'ltd' to 'lat'
+                            lng: position.coords.longitude
+                        }
+                     
+                    };
+                   
+    
+                    sendMessage('update-location-captain', locData);
+    
+                    console.log('Location sent:', locData); // ✅ this will print now
+                });
+            }
+        }
+    
+        updateLocation(); // call immediately
+        const locationInterval = setInterval(updateLocation, 10000); // repeat every 10s
+    
+        return () => clearInterval(locationInterval); // cleanup on unmount
+    }, [captain, sendMessage]);
+    
 
 
     useGSAP(function () {
