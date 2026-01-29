@@ -10,7 +10,7 @@ import { CaptainDataContext} from "../context/CaptainContext"
 
 const CaptainHome = () => {
 
-    const [ridePopupPanel, setRidePopupPanel] = useState(true)
+    const [ridePopupPanel, setRidePopupPanel] = useState(false)
     const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(false)
 
 
@@ -19,6 +19,7 @@ const CaptainHome = () => {
 
     const {sendMessage , receiveMessage ,socket} = React.useContext(SocketContext);
     const {captain} = React.useContext(CaptainDataContext);
+    const [ride,setRide] = useState(null);
 
     useEffect(() => {
         if (!captain) return;
@@ -45,7 +46,7 @@ const CaptainHome = () => {
     
                     sendMessage('update-location-captain', locData);
     
-                    console.log('Location sent:', locData); // ✅ this will print now
+                  
                 });
             }
         }
@@ -56,7 +57,12 @@ const CaptainHome = () => {
         return () => clearInterval(locationInterval); // cleanup on unmount
     }, [captain, sendMessage]);
     
-
+    socket.on("new-ride", (data) => {
+        setRide(data);
+        setRidePopupPanel(true);
+        console.log(" from frotnd New ride request received:", data);
+        
+    })
 
     useGSAP(function () {
         if (ridePopupPanel) {
@@ -98,7 +104,9 @@ return (
         <CaptainDetails />
     </div>
     <div ref={ridePopupPanelRef} className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
-        <RidePopUp setRidePopupPanel={setRidePopupPanel}  setConfirmRidePopupPanel={setConfirmRidePopupPanel} />
+        <RidePopUp
+            ride={ride}
+        setRidePopupPanel={setRidePopupPanel}  setConfirmRidePopupPanel={setConfirmRidePopupPanel} />
     </div>
     <div ref={confirmRidePopupPanelRef} className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
         <ConfirmRidePopUp setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel}  />

@@ -92,7 +92,7 @@ export const createRide= async (req,res)=>{
     console.log(pickupCoords)
   
 
-    const getCaptainInRadius = await getCaptainInTheRadius(pickupCoords.lat, pickupCoords.lng, 10);
+    const getCaptainInRadius = await getCaptainInTheRadius(pickupCoords.lat, pickupCoords.lng, 4);
 
     console.log(getCaptainInRadius)
  //save ride to db
@@ -112,11 +112,34 @@ const ride = new Ride({
     status: 'pending',
     otp: otpGenerator(6),
 });
-    const rideCreateSave =await ride.save("-otp");
+    const rideCreateSave =await ride.save();
     
     if(!rideCreateSave){
         throw new ApiError(500, "Could not create ride request, try again later");
     }
+
+    // Notify captains in radius via socket
+   
+
+    //ride with user details cause captains need to see user info
+    const rideWithUser = await Ride
+    .findById(ride._id)
+    .populate('user', '-password -refreshToken -socketId -otp');
+  
+
+    getCaptainInRadius.map((captain) =>{
+     const res=  sendMessageToSocketId(captain.socketId, {
+                    event: "new-ride",
+                      data: rideWithUser,
+                   });
+
+      if(res instanceof Error){
+        console.error("Socket error:", res.message);
+      }
+
+
+    })
+
 
     return res.status(201).json({
         success: true,

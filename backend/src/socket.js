@@ -33,9 +33,7 @@ const initializeSocket = (server) => {
           await Captain.findByIdAndUpdate(userId, {
             socketId: socket.id,
           });
-          console.log(
-            `from backend Captain ${userId} socket ID updated to ${socket.id}`
-          );
+     
         }
       } catch (error) {
         console.error("Join socket error:", error.message);
@@ -60,7 +58,6 @@ const initializeSocket = (server) => {
           },
         });
 
-        console.log("📍 Location updated for:", userId);
       } catch (error) {
         console.error("Location update error:", error.message);
       }
@@ -75,6 +72,7 @@ const sendMessageToSocketId = (socketId, messageObject) => {
     return;
   }
 
+console.log("fromm backend socket.js:", socketId, messageObject);
   io.to(socketId).emit(
     messageObject.event,
     messageObject.data
