@@ -8,6 +8,7 @@ import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
 import { SocketContext } from '../context/SocketContext';
 import { CaptainDataContext} from "../context/CaptainContext"
 
+
 const CaptainHome = () => {
 
     const [ridePopupPanel, setRidePopupPanel] = useState(false)
@@ -20,6 +21,25 @@ const CaptainHome = () => {
     const {sendMessage , receiveMessage ,socket} = React.useContext(SocketContext);
     const {captain} = React.useContext(CaptainDataContext);
     const [ride,setRide] = useState(null);
+
+    async function confrimRide(){
+            try {
+                    const res = await axios.post('/api/v1/rides/confirm-ride', {
+                        rideId: ride._id
+                    })
+
+                    if (res.data.success) {
+                        console.log("from captainHome.jsx Ride confirmed:", res.data.ride);
+                        setConfirmRidePopupPanel(true);
+                        setRidePopupPanel(false);
+                    }
+
+
+
+            } catch (error) {
+                console.log(" from captain home jsx Error confirming ride:", error);
+            }
+    }
 
     useEffect(() => {
         if (!captain) return;
@@ -105,11 +125,14 @@ return (
     </div>
     <div ref={ridePopupPanelRef} className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
         <RidePopUp
+          confrimRide={confrimRide}
             ride={ride}
         setRidePopupPanel={setRidePopupPanel}  setConfirmRidePopupPanel={setConfirmRidePopupPanel} />
     </div>
     <div ref={confirmRidePopupPanelRef} className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
-        <ConfirmRidePopUp setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel}  />
+        <ConfirmRidePopUp
+          
+        setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel}  />
     </div>
 </div>
 )

@@ -39,6 +39,16 @@
             const {sendMessage , receiveMessage} = React.useContext(SocketContext);
             const {user} = React.useContext(UserDataContext);
 
+
+            receiveMessage(
+                "ride-confirmed",
+               ride => {
+                console.log(" from home.jsx Ride confirmed:", ride);
+                setVehicleFound(false);
+                setWaitingForDriver(true);
+               }
+            )
+
             useEffect(() =>{
                 if(!user) return;
 
@@ -168,10 +178,10 @@
 
           const createRide = async () => {
             try {
-                const token = localStorage.getItem("Cap-token");
-                if (!token) {
-                    throw new Error("User not authenticated");
-                }
+                // const token = localStorage.getItem("token");
+                // if (!token) {
+                //     throw new Error("User not authenticated");
+                // }
         
                 const response = await axios.post(
                     `${import.meta.env.VITE_BASE_URL}/api/v1/rides/create-ride`,

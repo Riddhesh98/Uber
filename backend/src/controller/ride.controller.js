@@ -151,3 +151,39 @@ const ride = new Ride({
 
 }
 
+
+export const confrimRide = async ({rideId})=>{
+
+    if(!rideId){
+        throw new ApiError(400,"Ride ID is required to confirm ride");
+    }
+
+        const captainId = req.user?._id || null;
+
+        if(!captainId){
+            throw new ApiError(401,"Captain not authorized");
+        }
+
+        await Ride.findByIdAndUpdate(rideId,{
+            captain: captainId,
+            status: "accepted",
+        });
+
+        const ride = await Ride.findById(rideId).populate('user','-password');
+
+        // Notify user via socket
+        const res=  sendMessageToSocketId(ride?.user.socketId, {
+                        event: "ride-confirmed",
+                          data: ride,
+                       });
+
+        if(res instanceof Error){
+          console.error("Socket error:", res.message);
+        }
+
+        return ride;
+
+
+
+}
+
