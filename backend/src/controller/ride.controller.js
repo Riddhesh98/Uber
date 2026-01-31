@@ -2,6 +2,7 @@ import {calculateRoute, getRouteInfo , geocodeAddress, getCaptainInTheRadius} fr
 import {Ride} from "../models/ride.model.js"
 import crypto from "crypto"
 import {sendMessageToSocketId} from "../socket.js"
+import { ApiError } from "../utils/ApiError.js"
 
 
 export const otpGenerator = (digit)=>{
@@ -152,38 +153,41 @@ const ride = new Ride({
 }
 
 
-export const confrimRide = async ({rideId})=>{
+export const confrimRide = async (req) => {
+  const { rideId } = req.body;
 
-    if(!rideId){
-        throw new ApiError(400,"Ride ID is required to confirm ride");
-    }
+  if (!rideId) {
+    throw new ApiError(400, "Ride ID is required to confirm ride");
+  }
 
-        const captainId = req.user?._id || null;
+  const captainId = req.captain?._id || null;
 
-        if(!captainId){
-            throw new ApiError(401,"Captain not authorized");
-        }
+  
 
-        await Ride.findByIdAndUpdate(rideId,{
-            captain: captainId,
-            status: "accepted",
-        });
+  if (!captainId) {
+    throw new ApiError(401, "Captain not authorized");
+  }
 
-        const ride = await Ride.findById(rideId).populate('user','-password');
+  await Ride.findByIdAndUpdate(rideId, {
+    captain: captainId,
+    status: "accepted",
+  });
 
-        // Notify user via socket
-        const res=  sendMessageToSocketId(ride?.user.socketId, {
-                        event: "ride-confirmed",
-                          data: ride,
-                       });
-
-        if(res instanceof Error){
-          console.error("Socket error:", res.message);
-        }
-
-        return ride;
+  const ride = await Ride.findById(rideId)
+  .populate("user", "-password")
+  .populate("captain");
 
 
 
-}
+
+
+  sendMessageToSocketId(ride.user.socketId, {
+    event: "ride-confirmed",
+    data: ride,
+  });
+  
+
+  return ride;
+};
+
 

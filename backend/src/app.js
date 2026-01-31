@@ -9,6 +9,7 @@ app.use(cors({
         "https://fvc67gnl-5173.inc1.devtunnels.ms",
         "http://localhost:5174",
     ],
+    
     credentials: true
 }));
 

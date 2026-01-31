@@ -7,6 +7,7 @@ import gsap from 'gsap'
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
 import { SocketContext } from '../context/SocketContext';
 import { CaptainDataContext} from "../context/CaptainContext"
+import axios from 'axios'
 
 
 const CaptainHome = () => {
@@ -24,15 +25,23 @@ const CaptainHome = () => {
 
     async function confrimRide(){
             try {
-                    const res = await axios.post('/api/v1/rides/confirm-ride', {
-                        rideId: ride._id
-                    })
-
-                    if (res.data.success) {
-                        console.log("from captainHome.jsx Ride confirmed:", res.data.ride);
+                const res = await axios.post(
+                    `${import.meta.env.VITE_BASE_URL}/api/v1/rides/confirm-ride`,
+                    {
+                      rideId: ride._id
+                    },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${localStorage.getItem("Cap-token")}`
+                      }
+                    }
+                  )
+                  
+                    if (res.status === 200) {
                         setConfirmRidePopupPanel(true);
                         setRidePopupPanel(false);
-                    }
+                      }
+                      
 
 
 
@@ -129,9 +138,10 @@ return (
             ride={ride}
         setRidePopupPanel={setRidePopupPanel}  setConfirmRidePopupPanel={setConfirmRidePopupPanel} />
     </div>
-    <div ref={confirmRidePopupPanelRef} className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
+    <div ref={confirmRidePopupPanelRef} 
+    className='fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
         <ConfirmRidePopUp
-          
+            ride={ride}       
         setConfirmRidePopupPanel={setConfirmRidePopupPanel} setRidePopupPanel={setRidePopupPanel}  />
     </div>
 </div>

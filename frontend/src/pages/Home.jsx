@@ -35,19 +35,29 @@
             const [fareData, setFareData] = useState(null)
              const [ispickupActive, setIspickupActive] = useState(true)
             const [vehicleSelect, setvehicleSelect] = useState(null)
+            const[ride,setRide]=useState(null);
 
-            const {sendMessage , receiveMessage} = React.useContext(SocketContext);
+            const {sendMessage , receiveMessage , socket} = React.useContext(SocketContext);
             const {user} = React.useContext(UserDataContext);
 
 
-            receiveMessage(
-                "ride-confirmed",
-               ride => {
-                console.log(" from home.jsx Ride confirmed:", ride);
-                setVehicleFound(false);
-                setWaitingForDriver(true);
-               }
-            )
+            useEffect(() => {
+                const handler = (ride) => {
+                  
+                  setVehicleFound(false);
+                  setWaitingForDriver(true);
+                  setRide(ride);
+                };
+              
+                receiveMessage("ride-confirmed", handler);
+              
+                return () => {
+                  socket.off("ride-confirmed", handler);
+                };
+              }, []);
+              
+              
+             
 
             useEffect(() =>{
                 if(!user) return;
@@ -56,9 +66,8 @@
                     userType:"user",
                     userId:user.user?._id   
                 })
-                console.log(user)
-                console.log("User joined socket with ID:", user.user?._id);
-
+                
+              
               
 
             },[user])
@@ -193,7 +202,7 @@
                     { withCredentials: true } // ✅ send cookies
                 );
         
-                console.log("Ride created:", response.data);
+               
                 return response.data;
         
             } catch (error) {
@@ -292,7 +301,9 @@ className='w-full bg-black text-white text-2xl font-semibold py-3 mt-3 rounded-f
                     />
                 </div>
                 <div ref={waitingForDriverRef} className='fixed w-full z-10 bottom-0  bg-white px-3 py-6 pt-12'>
-                    <WaitingForDriver  waitingForDriver={waitingForDriver} />
+                    <WaitingForDriver 
+                        ride={ride}
+                    waitingForDriver={waitingForDriver} />
                 </div>
             </div>
         )
