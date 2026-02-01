@@ -10,9 +10,11 @@
     import axios from 'axios';
     import { SocketContext } from '../context/SocketContext';
     import {UserDataContext} from "../context/UserContext"
+    import { useNavigate } from 'react-router-dom';
 
-
+   
     const Home = () => {
+        const navigate = useNavigate();
         const [pickup, setPickup] = useState('')
         const [destination, setDestination] = useState('')
         const [panelOpen, setPanelOpen] = useState(false)
@@ -48,12 +50,35 @@
                   setWaitingForDriver(true);
                   setRide(ride);
                 };
-              
-                receiveMessage("ride-confirmed", handler);
-              
+              if( receiveMessage("ride-confirmed", handler)){
                 return () => {
-                  socket.off("ride-confirmed", handler);
-                };
+                    socket.off("ride-confirmed", handler);
+                  };
+              }
+              
+              const handler2 = (ride) => {
+                console.log("ride")
+                setWaitingForDriver(false)
+                navigate('/riding', { state: { ride } }) // Updated navigate to include ride data
+              }
+
+                if( receiveMessage("ride-started", handler2)){
+                    return () => {
+                        socket.off("ride-started", handler2);
+                      };
+                }
+
+                
+        // receiveMessage("ride-ended", ()=>{
+        //     navigate("/home", )
+        // })
+ 
+        // return () => {
+        //     // Cleanup if needed
+        //     socket.off("ride-ended");
+        // }
+              
+              
               }, []);
               
               

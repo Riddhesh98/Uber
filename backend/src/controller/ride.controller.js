@@ -220,7 +220,7 @@ export const startRide = async (req, res) => {
     ride.status = "ongoing";
     await ride.save();
 
-    console.log("Ride started from backend ride controller:", ride);
+
 
     // Notify user via socket
     sendMessageToSocketId(ride.user.socketId, {
@@ -235,3 +235,49 @@ export const startRide = async (req, res) => {
     return res.status(err.status || 500).json({ success: false, message: err.message });
   }
 };
+
+//end ride
+export const endRide = async (req, res) => {
+
+  try {
+    const { rideId } = req.body;
+
+    if (!rideId) {
+      throw new ApiError(400, "Ride ID is required to end ride");
+    }
+
+    const ride= await Ride.findById(rideId)
+    .populate("user", "-password")
+    .populate("captain");
+      
+    if (!ride) {
+      throw new ApiError(404, "Ride not found");
+    }
+
+    if(ride.status !== "ongoing"){
+        throw new ApiError(400, "Ride is not ongoing");
+    } 
+    
+
+    ride.status = "completed";
+    
+    console.log("Ride ended successfully ride data" , ride);
+    console.log("Ride ended successfully ride user socket id" , ride.user.socketId);
+        // Notify user via socket
+        sendMessageToSocketId(ride.user.socketId, {
+          event: "ride-ended",
+          data: ride,
+        });
+
+    await ride.save();
+
+
+
+
+    return res.status(200).json({ success: true, ride });
+  } catch (err) {
+    console.error("Error in endRide:", err.message || err);
+    return res.status(err.status || 500).json({ success: false, message: err.message });
+  }
+
+}

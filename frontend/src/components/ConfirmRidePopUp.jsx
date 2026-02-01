@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
+
 const ConfirmRidePopUp = (props) => {
   const [otp, setOtp] = useState('')
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ const ConfirmRidePopUp = (props) => {
         props.setRidePopupPanel(false)
 
         // Navigate to riding page
-        navigate('/captain-riding')
+        navigate('/captain-riding' ,{ state: { ride: props.ride} })
       }
     } catch (error) {
       console.error("Error starting ride:", error.response?.data || error.message)
