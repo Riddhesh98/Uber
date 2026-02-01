@@ -90,12 +90,13 @@ export const createRide= async (req,res)=>{
       motorcycle: Math.round(baseFare + costPerKmMoto * distance),
     };
 
-    console.log(pickupCoords)
+    
+
   
 
     const getCaptainInRadius = await getCaptainInTheRadius(pickupCoords.lat, pickupCoords.lng, 4);
 
-    console.log(getCaptainInRadius)
+   
  //save ride to db
 
     
@@ -173,9 +174,12 @@ export const confrimRide = async (req) => {
     status: "accepted",
   });
 
+  //add otp
+
   const ride = await Ride.findById(rideId)
   .populate("user", "-password")
-  .populate("captain");
+  .populate("captain")
+  .select("+otp");
 
 
 
@@ -190,4 +194,44 @@ export const confrimRide = async (req) => {
   return ride;
 };
 
+export const startRide = async (req, res) => {
+  try {
+    const { rideId, otp } = req.body;
 
+    console.log("from backend ride controller body:", req.body);
+
+    if (!rideId || !otp) {
+      throw new ApiError(400, "Ride ID and OTP are required to start ride");
+    }
+
+    const ride = await Ride.findById(rideId)
+      .select("+otp")
+      .populate("user", "-password")
+      .populate("captain");
+
+    if (!ride) {
+      throw new ApiError(404, "Ride not found");
+    }
+
+    if (ride.otp !== otp.toString()) {
+      throw new ApiError(400, "Invalid OTP");
+    }
+
+    ride.status = "ongoing";
+    await ride.save();
+
+    console.log("Ride started from backend ride controller:", ride);
+
+    // Notify user via socket
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-started",
+      data: ride,
+    });
+
+    // ✅ Send response directly
+    return res.status(200).json({ success: true, ride });
+  } catch (err) {
+    console.error("Error in startRide:", err.message || err);
+    return res.status(err.status || 500).json({ success: false, message: err.message });
+  }
+};
